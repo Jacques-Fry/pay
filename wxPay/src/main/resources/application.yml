@@ -1,0 +1,10 @@
+wx:
+  pay:
+    appId: wx8397f8696b538317
+    mchId: 1473426802
+    key: T6m9iK73b0kn9g5v426MKfHQH7X8rKwb
+    connectTimeoutMs: 5000
+    readTimeoutMs: 10000
+spring:
+  redis:
+    host: 192.168.100.181

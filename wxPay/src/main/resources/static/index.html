@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<p><!--输入文本获取二维码: <input id="id" type="text">-->
+    <button onclick="show(this)">生成付款码</button>
+</p>
+
+<div id="output"></div>
+
+<button id="selectCode" style="display: none" onclick="selectCode(this)">查询付款状态</button>
+
+<table id="statusShow" style="display: none">
+    <tr>
+        <td>付款状态码:</td>
+        <td id="statusCode"></td>
+    </tr>
+    <tr>
+        <td>实时付款状态:</td>
+        <td id="status"></td>
+    </tr>
+</table>
+
+
+<script src="jquery-3.1.0.min.js"></script>
+<script type="text/javascript" src="jquery.qrcode.min.js"></script>
+<script>
+
+    var orderId;
+
+    function create(text) {
+        $('#output').qrcode({
+            render: "canvas", //设置渲染方式，有table和canvas，使用canvas方式渲染性能相对来说比较好
+            text: text, //扫描二维码后显示的内容,可以直接填一个网址，扫描二维码后自动跳向该链接
+            width: 200, //二维码的宽度
+            height: 200,
+            background: "#ffffff", //二维码的后景色
+            foreground: "#000000", //二维码的前景色
+            src: 'timg.jpg',
+            imgWidth: 50,
+            imgHeight: 50
+        });
+    }
+
+    function show(button) {
+        $(button).attr("disabled",true);
+        $.ajax({
+            //几个参数需要注意一下
+            type: "GET",//方法类型
+            dataType: "json",//预期服务器返回的数据类型
+            url: "/create",//url
+            contentType: 'application/json;charset=UTF-8',
+            success: function (result) {
+                console.log(result);
+                create(result.data.url);
+                orderId=result.data.orderId;
+                $("#selectCode").show();
+            }, error: function () {
+                $(button).attr("disabled",false);
+            }
+        });
+
+    }
+
+    function selectCode(button) {
+         $(button).attr("disabled",true);
+         $.ajax({
+             //几个参数需要注意一下
+             type: "GET",//方法类型
+             dataType: "json",//预期服务器返回的数据类型
+             url: "/selectCode",//url
+             contentType: 'application/json;charset=UTF-8',
+             data:"orderId="+orderId,
+             success: function (result) {
+                 console.log(result);
+                 var statusCode=result.data;
+
+                 $("#statusCode").text(statusCode);
+                 if(statusCode=="NOT_PAY"){
+                     $("#status").text("未支付!");
+
+                 }else if(statusCode=="SUCCESS"){
+                     $("#status").text("支付成功!");
+
+                 }else if(statusCode=="FAIL"){
+                     $("#status").text("支付错误!");
+
+                 }else{
+                     $("#status").text("未知状态!");
+                 }
+
+                 $("#statusShow").show();
+                 $(button).attr("disabled",false);
+             }, error: function () {
+                 $(button).attr("disabled",false);
+             }
+         });
+    }
+
+</script>
+
+</body>
+</html>
